@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   ArrowDown, ArrowDownUp, ArrowRight, AudioLines, BookOpen, Boxes, Braces,
-  Calculator, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
+  Calculator, CheckCheck, ChevronDown, ChevronRight, CircleHelp,
   Clock3, Code2, Database, Download, ExternalLink, FileJson2, Filter,
   GitCompareArrows, GitFork, Globe2, Image, Info, Layers3, LayoutGrid,
   List, LoaderCircle, Search, Server, ShieldCheck, SlidersHorizontal,
-  Sparkles, TextCursorInput, Video, X, Zap,
+  TextCursorInput, Video, X, Zap,
 } from 'lucide-react'
 import type { Catalog, Category, ModelSpec, Offering } from './types.ts'
 import {
@@ -306,10 +306,10 @@ export default function App() {
   const reset = () => { setSearch(''); setCategory(''); setDeployment(''); setMode(''); setFamily(''); setFeature(''); setLimit(30) }
   const stale = catalog ? now - Date.parse(catalog.updatedAt) > 3 * 86400000 : false
   const tabHeading = {
-    catalog: ['Explore the model catalog', 'Compare pricing variants and documented capabilities, side by side.'],
-    calculator: ['Turn tokens into a budget', 'Simulate the same workload. Understand every cost component.'],
-    retail: ['Look beyond the model name', 'Explore original Microsoft billing meters, SKUs and regional rates.'],
-    guide: ['Make decisions with context', 'Official sources, methodology and what a price alone cannot tell you.'],
+    catalog: 'Model catalog',
+    calculator: 'Cost simulator',
+    retail: 'Azure retail meters',
+    guide: 'Resources & methodology',
   }
 
   return <div className="app-shell">
@@ -325,28 +325,15 @@ export default function App() {
     </div></header>
 
     <main>
-      <section className="hero">
-        <div className="hero-copy"><div className="eyebrow"><span className="live-dot" /> AZURE OPENAI · MODEL EXPLORER <Badge>Independent tool</Badge></div>
-          <h1>Find the right model.<br /><span>Make every token count.</span></h1>
-          <p>Official pricing. Documented capabilities. Clearer decisions.<br className="desktop-break" /> Explore Azure OpenAI models with the full picture in view.</p>
-          <div className="hero-actions"><button className="button primary" onClick={() => { setTab('catalog'); document.getElementById('workspace')?.scrollIntoView({ behavior: 'smooth' }) }}>Explore models <ArrowRight size={16} /></button><button className="hero-secondary" onClick={() => setTab('calculator')}><Calculator size={16} /> Estimate your costs</button></div>
-        </div>
-        <div className="hero-visual" aria-hidden="true"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="visual-dot dot-one" /><div className="visual-dot dot-two" />
-          <div className="visual-card visual-back"><div className="mini-model"><AudioLines size={17} /><span>Audio & speech</span><span className="tiny-pill">MULTIMODAL</span></div><div className="mock-line" /><div className="mock-line short" /></div>
-          <div className="visual-card visual-front"><div className="visual-card-top"><span className="visual-icon"><Sparkles size={21} /></span><span className="visual-check"><Check size={14} /> Official data</span></div><strong>One model. Every perspective.</strong><div className="visual-metrics"><span><i className="blue-dot" />Pricing<span>USD / billing unit</span></span><span><i className="teal-dot" />Capabilities<span>Microsoft Learn</span></span></div><div className="visual-bars"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="visual-foot"><GitCompareArrows size={14} /><span>Compare. Simulate. Decide.</span><ArrowRight size={14} /></div></div>
-          <div className="visual-chip"><ShieldCheck size={16} /><span>No API keys. No sign-in required.</span></div>
-        </div>
-      </section>
-
-      <section className="stats-row" aria-label="Catalog statistics">
-        <div><span className="stat-icon"><Boxes size={20} /></span><div><strong>{catalog ? new Set(catalog.offerings.map(o => displayName(o.name))).size : '—'}</strong><span>model variants</span></div></div>
-        <div><span className="stat-icon teal"><Globe2 size={20} /></span><div><strong>{catalog?.regions.length ?? '—'}</strong><span>pricing regions</span></div></div>
-        <div><span className="stat-icon violet"><Layers3 size={20} /></span><div><strong>{Object.keys(categories).length}</strong><span>model categories</span></div></div>
-        <div><span className="stat-icon amber"><Clock3 size={20} /></span><div><strong className="stat-update">{catalog ? new Date(catalog.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}{stale && <Badge color="orange">Outdated</Badge>}</strong><span>last data refresh</span></div></div>
-      </section>
-
       <section id="workspace" className="workspace">
-        <div className="workspace-heading"><div><div className="section-overline">WORKSPACE</div><h2>{tabHeading[tab][0]}</h2><p>{tabHeading[tab][1]}</p></div><div className="workspace-tools">
+        <div className="workspace-heading"><div className="workspace-summary"><div className="workspace-title"><h1>{tabHeading[tab]}</h1><span>Azure OpenAI</span></div>
+          <div className="catalog-status" aria-label="Catalog statistics">
+            <span><strong>{catalog ? new Set(catalog.offerings.map(o => displayName(o.name))).size : '—'}</strong> variants</span>
+            <span><strong>{catalog?.regions.length ?? '—'}</strong> regions</span>
+            <span><strong>{Object.keys(categories).length}</strong> categories</span>
+            <span className="status-updated"><Clock3 size={12} />{catalog ? date(catalog.updatedAt) : 'Loading data'}{stale && <Badge color="orange">Outdated</Badge>}</span>
+          </div>
+        </div><div className="workspace-tools">
           {tab !== 'guide' && tab !== 'retail' && <label className="region-select"><Globe2 size={16} /><select aria-label="Pricing region" value={region} onChange={e => { setRegion(e.target.value); setLimit(30) }}>{(catalog?.regions ?? [region]).map(r => <option key={r} value={r}>{regionLabel(r)}</option>)}</select><ChevronDown size={14} /></label>}
           <span className="currency-badge">USD <span>excl. tax</span></span>
         </div></div>
@@ -392,7 +379,6 @@ export default function App() {
             {!offerings.length && <div className="empty"><Search size={28} /><h3>No variants match your filters</h3><p>Try a different region, category or processing mode.</p><button className="button secondary" onClick={reset}>Reset filters</button></div>}
             {limit < offerings.length && <div className="load-more"><button className="button secondary" onClick={() => setLimit(limit + 30)}>Load more models <ChevronDown size={15} /></button><span>{Math.min(limit, offerings.length)} of {offerings.length} variants</span></div>}
             <div className="catalog-note"><Info size={15} /><span>Prices are per displayed unit, excluding tax. “—” = unpublished / not applicable. A price does not guarantee deployment availability.</span><button onClick={() => setTab('guide')}>Methodology <ArrowRight size={13} /></button></div>
-            <div className="bottom-cta"><div className="soft-icon"><Calculator size={23} /></div><div><h3>Your workload. Your model. A clearer budget.</h3><p>Add your token volume and see estimated costs for your scenario.</p></div><button className="button secondary" onClick={() => setTab('calculator')}>Open cost simulator <ArrowRight size={15} /></button></div>
           </>}
           {tab === 'calculator' && <CalculatorPanel catalog={catalog} region={region} selected={selected} workload={workload} onWorkload={setWorkload} onDetails={setDetail} />}
           {tab === 'retail' && <RetailExplorer catalog={catalog} />}

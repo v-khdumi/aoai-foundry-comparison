@@ -2,7 +2,9 @@
 
 An independent Azure OpenAI model comparison tool with an English,
 Microsoft Fluent-inspired interface: Segoe UI system typography, neutral
-surfaces, Azure blue accents and responsive layouts.
+surfaces, Azure blue accents and responsive layouts. A compact, data-first
+workspace replaces promotional banners: inline statistics, condensed filters
+and dense table rows keep models visible without scrolling past a hero section.
 
 **Website:** https://v-khdumi.github.io/aoai-foundry-comparison/
 
